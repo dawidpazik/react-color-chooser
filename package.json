@@ -1,0 +1,77 @@
+{
+    "name": "react-color-chooser",
+    "version": "1.0.0-beta2",
+    "description": "A color picker component for React",
+    "keywords": [
+        "react",
+        "color",
+        "picker",
+        "chooser",
+        "palette"
+    ],
+    "bugs": {
+        "url": "https://github.com/dawidpazik/react-color-chooser/issues"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/dawidpazik/react-color-chooser.git"
+    },
+    "license": "MIT",
+    "author": "Dawid Pazik",
+    "main": "lib/index.js",
+    "module": "lib/index.esm.js",
+    "types": "lib/index.d.ts",
+    "scripts": {
+        "build": "rollup -c",
+        "build-storybook": "storybook build",
+        "format": "prettier --write \"src/**/*.{ts,tsx}\"",
+        "lint": "eslint \"src/**/*.{ts,tsx}\"",
+        "prepare": "npm run build",
+        "prepublishOnly": "npm run lint",
+        "storybook": "storybook dev -p 6006",
+        "test": "jest --config jestconfig.json",
+        "preversion": "npm run lint",
+        "version": "npm run format && git add -A src",
+        "postversion": "git push && git push --tags"
+    },
+    "dependencies": {
+        "classnames": "^2.3.2"
+    },
+    "devDependencies": {
+        "@babel/preset-env": "^7.22.5",
+        "@babel/preset-react": "^7.22.5",
+        "@babel/preset-typescript": "^7.22.5",
+        "@jest/globals": "^29.5.0",
+        "@rollup/plugin-commonjs": "^25.0.3",
+        "@rollup/plugin-node-resolve": "^15.1.0",
+        "@rollup/plugin-typescript": "^11.1.2",
+        "@storybook/addon-essentials": "^7.0.22",
+        "@storybook/addon-interactions": "^7.0.22",
+        "@storybook/addon-links": "^7.0.22",
+        "@storybook/blocks": "^7.0.22",
+        "@storybook/react": "^7.0.22",
+        "@storybook/react-webpack5": "^7.0.22",
+        "@storybook/testing-library": "^0.0.14-next.2",
+        "@types/react": "^18.2.12",
+        "@types/react-dom": "^18.2.5",
+        "@typescript-eslint/eslint-plugin": "^5.59.11",
+        "@typescript-eslint/parser": "^5.59.11",
+        "eslint": "^8.43.0",
+        "eslint-plugin-react-hooks": "^4.6.0",
+        "eslint-plugin-storybook": "^0.6.12",
+        "jest": "^29.5.0",
+        "postcss": "^8.4.27",
+        "rollup": "^3.27.0",
+        "rollup-plugin-dts": "^5.3.0",
+        "rollup-plugin-peer-deps-external": "^2.2.4",
+        "rollup-plugin-postcss": "^4.0.2",
+        "storybook": "^7.0.22",
+        "ts-jest": "^29.1.0",
+        "typescript": "^5.1.6",
+        "typescript-plugin-css-modules": "^5.0.1"
+    },
+    "peerDependencies": {
+        "react": "^18.2.0",
+        "react-dom": "^18.2.0"
+    }
+}

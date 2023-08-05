@@ -1,0 +1,16 @@
+.predefinedColorChooserContainer {
+    overflow: auto;
+    display: flex;
+    flex-direction: row;
+    height: 32px;
+    gap: 3px;
+    max-width: 220px;
+}
+
+.predefinedColor {
+    width: 20px;
+    height: 20px;
+    border-style: solid;
+    border-color: #FDFDFD;
+    border-width: 1px;
+}

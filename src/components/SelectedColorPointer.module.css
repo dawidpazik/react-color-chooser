@@ -1,0 +1,16 @@
+.selectedColorPointer {
+    pointer-events: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+}
+
+.outerPointerCircle {
+    fill: none;
+    stroke: grey;
+}
+
+.innerPointerCircle {
+    fill: none;
+    stroke: white;
+}

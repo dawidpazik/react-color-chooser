@@ -1,0 +1,18 @@
+{
+    "compilerOptions": {
+        "target": "es5",
+        "outDir": "lib",
+        "declaration": true,
+        "declarationDir": "lib",
+        "esModuleInterop": true,
+        "strict": true,
+        "forceConsistentCasingInFileNames": true,
+        "strictNullChecks": false,
+        "noEmit": true,
+        "allowJs": true,
+        "jsx": "react",
+        "plugins": [{ "name": "typescript-plugin-css-modules" }]
+    },
+    "include": ["src"],
+    "exclude": ["node_modules", "lib"]
+}

@@ -1,0 +1,6 @@
+.contentContainer {
+    overflow: hidden;
+    position: fixed;
+    z-index: 100;
+    background-color: white;
+}

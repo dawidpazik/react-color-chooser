@@ -1,7 +1,7 @@
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef, useEffect, MutableRefObject, useState } from "react";
 import styles from "./SaturationAndValueSelector.module.css";
 import { HsvColor, hsvToRgbHex, rgbToHsv } from "../utils/Color";
-import { SelectedColorPointer } from "./SelectedColorPointer";
+import { PointerPosition, SelectedColorPointer } from "./SelectedColorPointer";
 
 export type SaturationAndValueSelectorProps = {
     selectedColor: HsvColor;
@@ -10,8 +10,35 @@ export type SaturationAndValueSelectorProps = {
 
 export const SaturationAndValueSelector = ({ selectedColor, onColorSelected }: SaturationAndValueSelectorProps) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
-    const [pointerPosition, setPointerPosition] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+    const [pointerPosition, setPointerPosition] = useState<PointerPosition>(null);
 
+    useEffect(() => {
+        setPointerPosition(calculatePointerPosition(canvasRef.current, selectedColor.s, selectedColor.v));
+    }, [selectedColor.s, selectedColor.v]);
+
+    return (
+        <div className={styles.canvasContainer}>
+            <SaturationAndValueSelectorCanvas
+                canvasRef={canvasRef}
+                selectedColor={selectedColor}
+                onColorSelected={onColorSelected}
+            />
+            <SelectedColorPointer position={pointerPosition} />
+        </div>
+    );
+};
+
+type SaturationAndValueSelectorCanvasProps = {
+    canvasRef: MutableRefObject<HTMLCanvasElement>;
+    selectedColor: HsvColor;
+    onColorSelected: (color: HsvColor) => void;
+};
+
+const SaturationAndValueSelectorCanvas = ({
+    canvasRef,
+    selectedColor,
+    onColorSelected,
+}: SaturationAndValueSelectorCanvasProps) => {
     useEffect(() => {
         const canvas = canvasRef.current;
         const context = canvas?.getContext("2d");
@@ -31,11 +58,11 @@ export const SaturationAndValueSelector = ({ selectedColor, onColorSelected }: S
         return () => {
             canvas.removeEventListener("click", handleClick);
         };
-    }, [onColorSelected]);
+    }, [onColorSelected, canvasRef]);
 
     useEffect(() => {
         const canvas = canvasRef.current;
-        const context = canvas?.getContext("2d");
+        const context = canvas.getContext("2d");
 
         const mainColor = hsvToRgbHex({ h: selectedColor.h, s: 1, v: 1 });
         const horizontalGradient = context.createLinearGradient(0, 0, context.canvas.width, 0);
@@ -49,21 +76,24 @@ export const SaturationAndValueSelector = ({ selectedColor, onColorSelected }: S
         verticalGradient.addColorStop(1, "#000000FF");
         context.fillStyle = verticalGradient;
         context.fillRect(0, 0, context.canvas.width, context.canvas.height);
-        const relativePointerHorizontalPositionInFraction = selectedColor.s;
-        const relativeHorizontalPointerPosition = canvas.width * relativePointerHorizontalPositionInFraction;
-        const relativePointerVerticalPositionInFraction = 1 - selectedColor.v;
-        const relativeVerticalPointerPosition = canvas.height * relativePointerVerticalPositionInFraction;
-        const canvasBoundingRect = canvas.getBoundingClientRect();
-        setPointerPosition({
-            x: canvasBoundingRect.left + relativeHorizontalPointerPosition,
-            y: canvasBoundingRect.top + relativeVerticalPointerPosition,
-        });
-    }, [selectedColor.h, selectedColor.s, selectedColor.v]);
+    }, [selectedColor.h, selectedColor.s, selectedColor.v, canvasRef]);
 
-    return (
-        <div className={styles.canvasContainer}>
-            <canvas ref={canvasRef} className={styles.canvas} />
-            <SelectedColorPointer position={pointerPosition} />
-        </div>
-    );
+    return <canvas ref={canvasRef} className={styles.canvas} />;
 };
+
+function calculatePointerPosition(
+    canvas: HTMLCanvasElement,
+    selectedColorSaturation: number,
+    selectedColorValue: number
+) {
+    const relativePointerHorizontalPositionInFraction = selectedColorSaturation;
+    const relativeHorizontalPointerPosition = canvas.width * relativePointerHorizontalPositionInFraction;
+    const relativePointerVerticalPositionInFraction = 1 - selectedColorValue;
+    const relativeVerticalPointerPosition = canvas.height * relativePointerVerticalPositionInFraction;
+    const canvasBoundingRect = canvas.getBoundingClientRect();
+
+    return {
+        x: canvasBoundingRect.left + relativeHorizontalPointerPosition,
+        y: canvasBoundingRect.top + relativeVerticalPointerPosition,
+    };
+}

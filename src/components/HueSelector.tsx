@@ -1,7 +1,7 @@
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef, useEffect, useState, MutableRefObject } from "react";
 import styles from "./HueSelector.module.css";
 import { HsvColor, rgbToHsv } from "../utils/Color";
-import { SelectedColorPointer } from "./SelectedColorPointer";
+import { PointerPosition, SelectedColorPointer } from "./SelectedColorPointer";
 
 export type HueSelectorProps = {
     selectedColor: HsvColor;
@@ -10,8 +10,27 @@ export type HueSelectorProps = {
 
 export const HueSelector = ({ selectedColor, onColorSelected }: HueSelectorProps) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
-    const [pointerPosition, setPointerPosition] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+    const [pointerPosition, setPointerPosition] = useState<PointerPosition>(null);
 
+    useEffect(() => {
+        setPointerPosition(calculatePointerPosition(canvasRef.current, selectedColor.h));
+    }, [selectedColor.h]);
+
+    return (
+        <div className={styles.canvasContainer}>
+            <HueSelectorCanvas canvasRef={canvasRef} selectedColor={selectedColor} onColorSelected={onColorSelected} />
+            <SelectedColorPointer position={pointerPosition} />
+        </div>
+    );
+};
+
+type HueSelectorCanvasProps = {
+    canvasRef: MutableRefObject<HTMLCanvasElement>;
+    selectedColor: HsvColor;
+    onColorSelected: (color: HsvColor) => void;
+};
+
+const HueSelectorCanvas = ({ canvasRef, selectedColor, onColorSelected }: HueSelectorCanvasProps) => {
     useEffect(() => {
         const canvas = canvasRef.current;
         const context = canvas?.getContext("2d");
@@ -46,23 +65,18 @@ export const HueSelector = ({ selectedColor, onColorSelected }: HueSelectorProps
         return () => {
             canvas.removeEventListener("click", handleClick);
         };
-    }, [onColorSelected, selectedColor.h, selectedColor.s, selectedColor.v]);
+    }, [onColorSelected, selectedColor.h, selectedColor.s, selectedColor.v, canvasRef]);
 
-    useEffect(() => {
-        const canvas = canvasRef.current;
-        const relativePointerVerticalPositionInFraction = selectedColor.h / 360;
-        const relativeVerticalPointerPosition = canvas.height * relativePointerVerticalPositionInFraction;
-        const canvasBoundingRect = canvas.getBoundingClientRect();
-        setPointerPosition({
-            x: canvasBoundingRect.left + canvas.width / 2,
-            y: canvasBoundingRect.top + relativeVerticalPointerPosition,
-        });
-    }, [selectedColor.h]);
-
-    return (
-        <div className={styles.canvasContainer}>
-            <canvas ref={canvasRef} className={styles.canvas} />
-            <SelectedColorPointer position={pointerPosition} />
-        </div>
-    );
+    return <canvas ref={canvasRef} className={styles.canvas} />;
 };
+
+function calculatePointerPosition(canvas: HTMLCanvasElement, selectedHue: number) {
+    const relativePointerVerticalPositionInFraction = selectedHue / 360;
+    const relativeVerticalPointerPosition = canvas.height * relativePointerVerticalPositionInFraction;
+    const canvasBoundingRect = canvas.getBoundingClientRect();
+
+    return {
+        x: canvasBoundingRect.left + canvas.width / 2,
+        y: canvasBoundingRect.top + relativeVerticalPointerPosition,
+    };
+}

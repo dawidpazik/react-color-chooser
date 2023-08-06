@@ -4,21 +4,28 @@ import { HsvColor, rgbToHsv } from "../utils/Color";
 import { PointerPosition, SelectedColorPointer } from "./SelectedColorPointer";
 
 export type HueSelectorProps = {
-    selectedColor: HsvColor;
+    selectedHue: number;
+    selectedSaturation: number;
+    selectedValue: number;
     onColorSelected: (color: HsvColor) => void;
 };
 
-export const HueSelector = ({ selectedColor, onColorSelected }: HueSelectorProps) => {
+export const HueSelector = ({ selectedHue, selectedSaturation, selectedValue, onColorSelected }: HueSelectorProps) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const [pointerPosition, setPointerPosition] = useState<PointerPosition>(null);
 
     useEffect(() => {
-        setPointerPosition(calculatePointerPosition(canvasRef.current, selectedColor.h));
-    }, [selectedColor.h]);
+        setPointerPosition(calculatePointerPosition(canvasRef.current, selectedHue));
+    }, [selectedHue]);
 
     return (
         <div className={styles.canvasContainer}>
-            <HueSelectorCanvas canvasRef={canvasRef} selectedColor={selectedColor} onColorSelected={onColorSelected} />
+            <HueSelectorCanvas
+                canvasRef={canvasRef}
+                selectedSaturation={selectedSaturation}
+                selectedValue={selectedValue}
+                onColorSelected={onColorSelected}
+            />
             <SelectedColorPointer position={pointerPosition} />
         </div>
     );
@@ -26,11 +33,27 @@ export const HueSelector = ({ selectedColor, onColorSelected }: HueSelectorProps
 
 type HueSelectorCanvasProps = {
     canvasRef: MutableRefObject<HTMLCanvasElement>;
-    selectedColor: HsvColor;
+    selectedSaturation: number;
+    selectedValue: number;
     onColorSelected: (color: HsvColor) => void;
 };
 
-const HueSelectorCanvas = ({ canvasRef, selectedColor, onColorSelected }: HueSelectorCanvasProps) => {
+const offsetToColorNameMap = new Map<number, string>([
+    [0, "red"],
+    [0.17, "yellow"],
+    [0.33, "lime"],
+    [0.5, "cyan"],
+    [0.66, "blue"],
+    [0.83, "magenta"],
+    [1, "red"],
+]);
+
+const HueSelectorCanvas = ({
+    canvasRef,
+    selectedSaturation,
+    selectedValue,
+    onColorSelected,
+}: HueSelectorCanvasProps) => {
     useEffect(() => {
         const canvas = canvasRef.current;
         const context = canvas?.getContext("2d");
@@ -38,13 +61,7 @@ const HueSelectorCanvas = ({ canvasRef, selectedColor, onColorSelected }: HueSel
         canvas.width = canvas.offsetWidth;
 
         const gradient = context.createLinearGradient(0, 0, 0, context.canvas.height);
-        gradient.addColorStop(0, "red");
-        gradient.addColorStop(0.17, "yellow");
-        gradient.addColorStop(0.33, "lime");
-        gradient.addColorStop(0.5, "cyan");
-        gradient.addColorStop(0.66, "blue");
-        gradient.addColorStop(0.83, "magenta");
-        gradient.addColorStop(1, "red");
+        offsetToColorNameMap.forEach((colorName: string, offset: number) => gradient.addColorStop(offset, colorName));
         context.fillStyle = gradient;
         context.fillRect(0, 0, context.canvas.width, context.canvas.height);
 
@@ -55,8 +72,8 @@ const HueSelectorCanvas = ({ canvasRef, selectedColor, onColorSelected }: HueSel
             const pixel = context.getImageData(x, y, 1, 1).data;
             onColorSelected({
                 h: rgbToHsv({ r: pixel[0], g: pixel[1], b: pixel[2] }).h,
-                s: selectedColor.s,
-                v: selectedColor.v,
+                s: selectedSaturation,
+                v: selectedValue,
             });
         };
 
@@ -65,12 +82,16 @@ const HueSelectorCanvas = ({ canvasRef, selectedColor, onColorSelected }: HueSel
         return () => {
             canvas.removeEventListener("click", handleClick);
         };
-    }, [onColorSelected, selectedColor.h, selectedColor.s, selectedColor.v, canvasRef]);
+    }, [onColorSelected, selectedSaturation, selectedValue, canvasRef]);
 
     return <canvas ref={canvasRef} className={styles.canvas} />;
 };
 
 function calculatePointerPosition(canvas: HTMLCanvasElement, selectedHue: number) {
+    if (selectedHue == null) {
+        return null;
+    }
+
     const relativePointerVerticalPositionInFraction = selectedHue / 360;
     const relativeVerticalPointerPosition = canvas.height * relativePointerVerticalPositionInFraction;
     const canvasBoundingRect = canvas.getBoundingClientRect();

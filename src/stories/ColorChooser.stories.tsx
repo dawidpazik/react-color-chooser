@@ -1,23 +1,16 @@
-import React from "react";
+import React, { useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react";
-import { useArgs } from "@storybook/preview-api";
 
 import { ColorChooser } from "..";
-import { HexColor } from "../utils/Color";
 
 const meta = {
     component: ColorChooser,
     tags: ["autodocs"],
     decorators: [
         (Story, ctx) => {
-            const [, setArgs] = useArgs<typeof ctx.args>();
+            const [selectedColor, setSelectedColor] = useState(ctx.args.selectedColor);
 
-            const onColorSelected = (selectedColor: HexColor) => {
-                ctx.args.onColorSelected?.(selectedColor);
-                setArgs({ selectedColor });
-            };
-
-            return <Story args={{ ...ctx.args, onColorSelected }} />;
+            return <Story args={{ ...ctx.args, selectedColor, onColorSelected: setSelectedColor }} />;
         },
     ],
 } satisfies Meta<typeof ColorChooser>;
@@ -29,7 +22,7 @@ export const BothPredefinedAndCustomColors: Story = {
     args: {
         mode: {
             allowCustomColors: true,
-            predefinedColors: ["#000000", "#3f48cc", "#a349a4", "#ed1c24", "#fff200", "#22b14c", "#f29727"],
+            predefinedColors: ["#000000", "#ed1c24", "#ff7f27", "#fff200", "#22b14c", "#00a2e8", "#3f48cc", "#a349a4"],
         },
         selectedColor: "#3f48cc",
         portalRootId: "portal-root",
@@ -40,7 +33,7 @@ export const PredefinedColorsOnly: Story = {
     args: {
         mode: {
             allowCustomColors: false,
-            predefinedColors: ["#000000", "#3f48cc", "#a349a4", "#ed1c24", "#fff200", "#22b14c", "#f29727"],
+            predefinedColors: ["#000000", "#ed1c24", "#ff7f27", "#fff200", "#22b14c", "#00a2e8", "#3f48cc", "#a349a4"],
         },
         selectedColor: "#3f48cc",
         portalRootId: "portal-root",

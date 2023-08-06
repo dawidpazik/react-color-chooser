@@ -1,6 +1,6 @@
 .customColorChooserContainer {
     display: grid;
-    grid-gap: 10px;
+    grid-gap: 5px;
     grid-template-columns: 208px 18px;
     grid-template-rows: 208px;
 }

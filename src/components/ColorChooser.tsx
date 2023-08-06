@@ -7,6 +7,7 @@ import { PredefinedColorChooser } from "./PredefinedColorChooser";
 import { useClickOutsideDetection } from "../hooks/useClickOutsideDetection";
 import { useScrollDetection } from "../hooks/useScrollDetection";
 import { useKeyDownDetection } from "../hooks/useKeyDownDetection";
+import classNames from "classnames";
 
 export type ColorChooserMode =
     | { allowCustomColors: false; predefinedColors: HexColor[] }
@@ -52,7 +53,10 @@ export const ColorChooser = ({
     return (
         <div className={className}>
             <button ref={buttonRef} onClick={handleButtonClick} className={styles.button}>
-                <div className={styles.colorPreview} style={{ backgroundColor: selectedColor }}></div>
+                <div
+                    className={classNames(styles.colorPreview, { [styles.empty]: !selectedColor })}
+                    style={{ backgroundColor: selectedColor }}
+                ></div>
             </button>
             {isModalOpen && (
                 <Modal position={modalPosition} portalRootId={portalRootId}>

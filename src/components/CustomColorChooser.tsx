@@ -11,7 +11,7 @@ export type CustomColorChooserProps = {
 };
 
 export const CustomColorChooser = ({ selectedColor, onColorSelected }: CustomColorChooserProps) => {
-    const selectedColorHsv = useMemo(() => hexToHsv(selectedColor), [selectedColor]);
+    const selectedColorHsv = useMemo(() => selectedColor && hexToHsv(selectedColor), [selectedColor]);
     const handleColorSelected = useCallback(
         (hsvColor: HsvColor) => onColorSelected(hsvToRgbHex(hsvColor)),
         [onColorSelected]
@@ -19,8 +19,18 @@ export const CustomColorChooser = ({ selectedColor, onColorSelected }: CustomCol
 
     return (
         <div className={styles.customColorChooserContainer}>
-            <SaturationAndValueSelector selectedColor={selectedColorHsv} onColorSelected={handleColorSelected} />
-            <HueSelector selectedColor={selectedColorHsv} onColorSelected={handleColorSelected} />
+            <SaturationAndValueSelector
+                selectedHue={selectedColorHsv?.h}
+                selectedSaturation={selectedColorHsv?.s}
+                selectedValue={selectedColorHsv?.v}
+                onColorSelected={handleColorSelected}
+            />
+            <HueSelector
+                selectedHue={selectedColorHsv?.h}
+                selectedSaturation={selectedColorHsv?.s}
+                selectedValue={selectedColorHsv?.v}
+                onColorSelected={handleColorSelected}
+            />
         </div>
     );
 };

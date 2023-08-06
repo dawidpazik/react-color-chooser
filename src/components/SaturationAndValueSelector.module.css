@@ -1,0 +1,8 @@
+.canvasContainer {
+    padding: 4px;
+}
+
+.canvas {
+    height: 100%;
+    width: 100%;
+}

@@ -4,18 +4,3 @@
     grid-template-columns: 208px 18px;
     grid-template-rows: 208px;
 }
-
-.canvasContainer {
-    padding: 4px;
-}
-
-.colorCanvas {
-    height: 100%;
-    width: 100%;
-}
-
-.hueSlider {
-    height: 100%;
-    width: 100%;
-    border-radius: 10px;
-}

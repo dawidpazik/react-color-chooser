@@ -87,24 +87,9 @@ const SaturationAndValueSelectorCanvas = ({
 }: SaturationAndValueSelectorCanvasProps) => {
     useEffect(() => {
         const canvas = canvasRef.current;
-        const context = canvas.getContext("2d");
         canvas.height = canvas.offsetHeight;
         canvas.width = canvas.offsetWidth;
-
-        const handleClick = (event: MouseEvent) => {
-            const rect = canvas.getBoundingClientRect();
-            const x = event.clientX - rect.left;
-            const y = event.clientY - rect.top;
-            const pixel = context.getImageData(x, y, 1, 1).data;
-            onColorSelected(rgbToHsv({ r: pixel[0], g: pixel[1], b: pixel[2] }));
-        };
-
-        canvas.addEventListener("click", handleClick);
-
-        return () => {
-            canvas.removeEventListener("click", handleClick);
-        };
-    }, [onColorSelected, canvasRef]);
+    }, [canvasRef]);
 
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -124,7 +109,17 @@ const SaturationAndValueSelectorCanvas = ({
         context.fillRect(0, 0, context.canvas.width, context.canvas.height);
     }, [selectedHue, canvasRef]);
 
-    return <canvas ref={canvasRef} className={styles.canvas} />;
+    const handleClick = (event: React.MouseEvent) => {
+        const canvas = event.target as HTMLCanvasElement;
+        const context = canvas.getContext("2d");
+        const rect = canvas.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+        const pixel = context.getImageData(x, y, 1, 1).data;
+        onColorSelected(rgbToHsv({ r: pixel[0], g: pixel[1], b: pixel[2] }));
+    };
+
+    return <canvas ref={canvasRef} className={styles.canvas} onClick={handleClick} />;
 };
 
 function calculatePointerPosition(

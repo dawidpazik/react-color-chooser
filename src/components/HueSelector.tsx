@@ -103,27 +103,23 @@ const HueSelectorCanvas = ({
         offsetToColorNameMap.forEach((colorName: string, offset: number) => gradient.addColorStop(offset, colorName));
         context.fillStyle = gradient;
         context.fillRect(0, 0, context.canvas.width, context.canvas.height);
+    }, [canvasRef]);
 
-        const handleClick = (event: MouseEvent) => {
-            const rect = canvas.getBoundingClientRect();
-            const x = event.clientX - rect.x;
-            const y = event.clientY - rect.y;
-            const pixel = context.getImageData(x, y, 1, 1).data;
-            onColorSelected({
-                h: rgbToHsv({ r: pixel[0], g: pixel[1], b: pixel[2] }).h,
-                s: selectedSaturation,
-                v: selectedValue,
-            });
-        };
+    const handleClick = (event: React.MouseEvent) => {
+        const canvas = event.target as HTMLCanvasElement;
+        const context = canvas.getContext("2d");
+        const rect = canvas.getBoundingClientRect();
+        const x = event.clientX - rect.x;
+        const y = event.clientY - rect.y;
+        const pixel = context.getImageData(x, y, 1, 1).data;
+        onColorSelected({
+            h: rgbToHsv({ r: pixel[0], g: pixel[1], b: pixel[2] }).h,
+            s: selectedSaturation,
+            v: selectedValue,
+        });
+    };
 
-        canvas.addEventListener("click", handleClick);
-
-        return () => {
-            canvas.removeEventListener("click", handleClick);
-        };
-    }, [onColorSelected, selectedSaturation, selectedValue, canvasRef]);
-
-    return <canvas ref={canvasRef} className={styles.canvas} />;
+    return <canvas ref={canvasRef} className={styles.canvas} onClick={handleClick} />;
 };
 
 function calculatePointerPosition(canvas: HTMLCanvasElement, selectedHue: number) {

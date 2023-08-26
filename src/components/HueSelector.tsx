@@ -12,21 +12,53 @@ export type HueSelectorProps = {
 
 export const HueSelector = ({ selectedHue, selectedSaturation, selectedValue, onColorSelected }: HueSelectorProps) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
-    const [pointerPosition, setPointerPosition] = useState<PointerPosition>(null);
+    const pointerRef = useRef<HTMLDivElement>();
+    const [pointerPosition, setPointerPosition] = useState<PointerPosition>();
+    const [isPointerBeingMoved, setIsPointerBeingMoved] = useState(false);
 
     useEffect(() => {
         setPointerPosition(calculatePointerPosition(canvasRef.current, selectedHue));
     }, [selectedHue]);
 
+    const handleMouseDown = (e: React.MouseEvent) => {
+        if (pointerRef.current.contains(document.elementFromPoint(e.clientX, e.clientY))) {
+            setIsPointerBeingMoved(true);
+        }
+    };
+
+    const handleMouseUp = () => {
+        setIsPointerBeingMoved(false);
+    };
+
+    const handleMouseMove = (e: React.MouseEvent) => {
+        if (!isPointerBeingMoved) {
+            return;
+        }
+        const rect = canvasRef.current.getBoundingClientRect();
+        const x = pointerPosition.x;
+        const y = e.clientY - rect.top;
+        const pixel = canvasRef.current.getContext("2d").getImageData(x, y, 1, 1).data;
+        onColorSelected({
+            h: rgbToHsv({ r: pixel[0], g: pixel[1], b: pixel[2] }).h,
+            s: selectedSaturation,
+            v: selectedValue,
+        });
+    };
+
     return (
-        <div className={styles.canvasContainer}>
+        <div
+            className={styles.canvasContainer}
+            onMouseDown={handleMouseDown}
+            onMouseUp={handleMouseUp}
+            onMouseMove={handleMouseMove}
+        >
             <HueSelectorCanvas
                 canvasRef={canvasRef}
                 selectedSaturation={selectedSaturation}
                 selectedValue={selectedValue}
                 onColorSelected={onColorSelected}
             />
-            <SelectedColorPointer position={pointerPosition} />
+            <SelectedColorPointer position={pointerPosition} ref={pointerRef} />
         </div>
     );
 };
@@ -94,10 +126,9 @@ function calculatePointerPosition(canvas: HTMLCanvasElement, selectedHue: number
 
     const relativePointerVerticalPositionInFraction = selectedHue / 360;
     const relativeVerticalPointerPosition = canvas.height * relativePointerVerticalPositionInFraction;
-    const canvasBoundingRect = canvas.getBoundingClientRect();
 
     return {
-        x: canvasBoundingRect.left + canvas.width / 2,
-        y: canvasBoundingRect.top + relativeVerticalPointerPosition,
+        x: canvas.width / 2,
+        y: relativeVerticalPointerPosition,
     };
 }

@@ -18,21 +18,49 @@ export const SaturationAndValueSelector = ({
     selectedValue,
     onColorSelected,
 }: SaturationAndValueSelectorProps) => {
-    const canvasRef = useRef<HTMLCanvasElement>(null);
-    const [pointerPosition, setPointerPosition] = useState<PointerPosition>(null);
+    const canvasRef = useRef<HTMLCanvasElement>();
+    const pointerRef = useRef<HTMLDivElement>();
+    const [pointerPosition, setPointerPosition] = useState<PointerPosition>();
+    const [isPointerBeingMoved, setIsPointerBeingMoved] = useState(false);
 
     useEffect(() => {
         setPointerPosition(calculatePointerPosition(canvasRef.current, selectedSaturation, selectedValue));
     }, [selectedSaturation, selectedValue]);
 
+    const handleMouseDown = (e: React.MouseEvent) => {
+        if (pointerRef.current.contains(document.elementFromPoint(e.clientX, e.clientY))) {
+            setIsPointerBeingMoved(true);
+        }
+    };
+
+    const handleMouseUp = () => {
+        setIsPointerBeingMoved(false);
+    };
+
+    const handleMouseMove = (e: React.MouseEvent) => {
+        if (!isPointerBeingMoved) {
+            return;
+        }
+        const rect = canvasRef.current.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        const pixel = canvasRef.current.getContext("2d").getImageData(x, y, 1, 1).data;
+        onColorSelected(rgbToHsv({ r: pixel[0], g: pixel[1], b: pixel[2] }));
+    };
+
     return (
-        <div className={styles.canvasContainer}>
+        <div
+            className={styles.canvasContainer}
+            onMouseDown={handleMouseDown}
+            onMouseUp={handleMouseUp}
+            onMouseMove={handleMouseMove}
+        >
             <SaturationAndValueSelectorCanvas
                 canvasRef={canvasRef}
                 selectedHue={selectedHue}
                 onColorSelected={onColorSelected}
             />
-            <SelectedColorPointer position={pointerPosition} />
+            <SelectedColorPointer position={pointerPosition} ref={pointerRef} />
         </div>
     );
 };
@@ -50,7 +78,7 @@ const SaturationAndValueSelectorCanvas = ({
 }: SaturationAndValueSelectorCanvasProps) => {
     useEffect(() => {
         const canvas = canvasRef.current;
-        const context = canvas?.getContext("2d");
+        const context = canvas.getContext("2d");
         canvas.height = canvas.offsetHeight;
         canvas.width = canvas.offsetWidth;
 
@@ -103,10 +131,9 @@ function calculatePointerPosition(
     const relativeHorizontalPointerPosition = canvas.width * relativePointerHorizontalPositionInFraction;
     const relativePointerVerticalPositionInFraction = 1 - selectedColorValue;
     const relativeVerticalPointerPosition = canvas.height * relativePointerVerticalPositionInFraction;
-    const canvasBoundingRect = canvas.getBoundingClientRect();
 
     return {
-        x: canvasBoundingRect.left + relativeHorizontalPointerPosition,
-        y: canvasBoundingRect.top + relativeVerticalPointerPosition,
+        x: relativeHorizontalPointerPosition,
+        y: relativeVerticalPointerPosition,
     };
 }

@@ -1,5 +1,6 @@
 .canvasContainer {
-    padding: 4px;
+    margin: 4px;
+    position: relative;
 }
 
 .canvas {

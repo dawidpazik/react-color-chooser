@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useState, MouseEvent } from "react";
+import React, { useRef, useState, MouseEvent } from "react";
 import { HexColor } from "../utils/Color";
 import { CustomColorChooser } from "./CustomColorChooser";
 import { Modal, ModalPosition } from "./Modal";
@@ -17,6 +17,7 @@ export type ColorChooserProps = {
     mode?: ColorChooserMode;
     selectedColor: HexColor;
     onColorSelected: (color: HexColor) => void;
+    onClose?: () => void;
     portalRootId?: string;
     className?: string;
 };
@@ -24,6 +25,7 @@ export type ColorChooserProps = {
 export const ColorChooser = ({
     selectedColor,
     onColorSelected,
+    onClose,
     portalRootId,
     className,
     mode = { allowCustomColors: true },
@@ -32,19 +34,27 @@ export const ColorChooser = ({
     const [modalPosition, setModalPosition] = useState<ModalPosition>({ x: 0, y: 0 });
     const buttonRef = useRef<HTMLButtonElement>(null);
 
-    const handleButtonClick = useCallback(
-        (event: MouseEvent<HTMLElement>) => {
-            const rect = buttonRef.current.getBoundingClientRect();
-            setModalPosition({ x: rect.x, y: rect.bottom });
-            setIsModalOpen((isModalOpen) => !isModalOpen);
-            event.stopPropagation();
-        },
-        [buttonRef]
-    );
+    const handleButtonClick = (event: MouseEvent<HTMLElement>) => {
+        const rect = buttonRef.current.getBoundingClientRect();
+        setModalPosition({ x: rect.x, y: rect.bottom });
+        if (isModalOpen) {
+            hideModal();
+        } else {
+            showModal();
+        }
+        event.stopPropagation();
+    };
 
-    const hideModal = useCallback(() => {
-        setIsModalOpen(false);
-    }, []);
+    const showModal = () => {
+        setIsModalOpen(true);
+    };
+
+    const hideModal = () => {
+        if (isModalOpen) {
+            setIsModalOpen(false);
+            onClose?.();
+        }
+    };
 
     const modalContentRef = useClickOutsideDetection(hideModal);
     useScrollDetection(hideModal);

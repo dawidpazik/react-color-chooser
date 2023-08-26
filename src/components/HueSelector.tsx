@@ -20,7 +20,19 @@ export const HueSelector = ({ selectedHue, selectedSaturation, selectedValue, on
         setPointerPosition(calculatePointerPosition(canvasRef.current, selectedHue));
     }, [selectedHue]);
 
-    const handleMouseDown = (e: React.MouseEvent) => {
+    useEffect(() => {
+        document.addEventListener("mousedown", handleMouseDown);
+        document.addEventListener("mouseup", handleMouseUp);
+        document.addEventListener("mousemove", handleMouseMove);
+
+        return () => {
+            document.removeEventListener("mousedown", handleMouseDown);
+            document.removeEventListener("mouseup", handleMouseUp);
+            document.removeEventListener("mousemove", handleMouseMove);
+        };
+    });
+
+    const handleMouseDown = (e: MouseEvent) => {
         if (pointerRef.current.contains(document.elementFromPoint(e.clientX, e.clientY))) {
             setIsPointerBeingMoved(true);
         }
@@ -30,14 +42,14 @@ export const HueSelector = ({ selectedHue, selectedSaturation, selectedValue, on
         setIsPointerBeingMoved(false);
     };
 
-    const handleMouseMove = (e: React.MouseEvent) => {
+    const handleMouseMove = (e: MouseEvent) => {
         if (!isPointerBeingMoved) {
             return;
         }
         const rect = canvasRef.current.getBoundingClientRect();
-        const x = pointerPosition.x;
         const y = e.clientY - rect.top;
-        const pixel = canvasRef.current.getContext("2d").getImageData(x, y, 1, 1).data;
+        const effectiveY = Math.max(Math.min(y, rect.height - 1), 0);
+        const pixel = canvasRef.current.getContext("2d").getImageData(pointerPosition.x, effectiveY, 1, 1).data;
         onColorSelected({
             h: rgbToHsv({ r: pixel[0], g: pixel[1], b: pixel[2] }).h,
             s: selectedSaturation,
@@ -46,12 +58,7 @@ export const HueSelector = ({ selectedHue, selectedSaturation, selectedValue, on
     };
 
     return (
-        <div
-            className={styles.canvasContainer}
-            onMouseDown={handleMouseDown}
-            onMouseUp={handleMouseUp}
-            onMouseMove={handleMouseMove}
-        >
+        <div className={styles.canvasContainer}>
             <HueSelectorCanvas
                 canvasRef={canvasRef}
                 selectedSaturation={selectedSaturation}

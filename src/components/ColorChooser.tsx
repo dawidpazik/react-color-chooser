@@ -20,6 +20,7 @@ export type ColorChooserProps = {
     onClose?: () => void;
     portalRootId?: string;
     className?: string;
+    disabled?: boolean;
 };
 
 export const ColorChooser = ({
@@ -28,6 +29,7 @@ export const ColorChooser = ({
     onClose,
     portalRootId,
     className,
+    disabled,
     mode = { allowCustomColors: true },
 }: ColorChooserProps) => {
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
@@ -62,7 +64,7 @@ export const ColorChooser = ({
 
     return (
         <div className={className}>
-            <button ref={buttonRef} onClick={handleButtonClick} className={styles.button}>
+            <button ref={buttonRef} onClick={handleButtonClick} className={styles.button} disabled={disabled}>
                 <div
                     className={classNames(styles.colorPreview, { [styles.empty]: !selectedColor })}
                     style={{ backgroundColor: selectedColor }}
@@ -71,7 +73,7 @@ export const ColorChooser = ({
             {isModalOpen && (
                 <Modal position={modalPosition} portalRootId={portalRootId}>
                     <div className={styles.modalContent} ref={modalContentRef}>
-                        {mode.predefinedColors && mode.predefinedColors.length && (
+                        {mode.predefinedColors && (
                             <PredefinedColorChooser
                                 predefinedColors={mode.predefinedColors}
                                 selectedColor={selectedColor}

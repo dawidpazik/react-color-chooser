@@ -49,7 +49,8 @@ function App() {
 `mode` - color selection mode: predefined colors, custom colors or both\
 `onClose` - a callback called when the picker modal is closed\
 `portalRootId` - id of portal root element; if not specified body element is used\
-`className` - class name of the main picker container
+`className` - class name of the main picker container\
+`disabled` - when true, the button is disabled and the popup doesn't appear on click
 
 
 ### Modes ###

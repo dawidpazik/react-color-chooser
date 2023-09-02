@@ -13,15 +13,17 @@ export type PredefinedColorChooserProps = {
 export const PredefinedColorChooser = ({ predefinedColors, onColorSelected }: PredefinedColorChooserProps) => {
     return (
         <div className={classNames(styles.predefinedColorChooserContainer)}>
-            {predefinedColors.map((x) => (
-                <div key={x} onClick={() => onColorSelected(x)}>
-                    <div
-                        className={styles.predefinedColor}
-                        style={{ backgroundColor: x }}
-                        onClick={() => onColorSelected(x)}
-                    ></div>
-                </div>
-            ))}
+            {predefinedColors.length > 0
+                ? predefinedColors.map((x) => (
+                      <div key={x} onClick={() => onColorSelected(x)}>
+                          <div
+                              className={styles.predefinedColor}
+                              style={{ backgroundColor: x }}
+                              onClick={() => onColorSelected(x)}
+                          ></div>
+                      </div>
+                  ))
+                : "No colors defined"}
         </div>
     );
 };

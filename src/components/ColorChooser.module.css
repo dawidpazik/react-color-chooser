@@ -33,6 +33,10 @@
     color: black;
 }
 
+.button:disabled:before {
+    color: grey;
+}
+
 .modalContent {
     display: flex;
     flex-direction: column;
